@@ -1,3 +1,6 @@
+import time
+import matplotlib.pyplot as plt
+
 class Action:
     def __init__(self, name, preconditions, add_effects, del_effects):
         self.name = name
@@ -18,6 +21,7 @@ class PlanningGraph:
     def build_graph(self, goal_state, max_steps=10):
         current_state = self.initial_state
         for step in range(max_steps):
+            print(f"Building layer {step}")
             action_layer = []
             new_state = current_state.copy()
 
@@ -43,19 +47,36 @@ class PlanningGraph:
             print("")
 
 
-# Define actions
-actions = [
-    Action("Pick up key", preconditions={"at door"}, add_effects={"has key"}, del_effects=set()),
-    Action("Unlock door", preconditions={"has key"}, add_effects={"door unlocked"}, del_effects=set()),
-    Action("Open door", preconditions={"door unlocked"}, add_effects={"door open"}, del_effects=set()),
-    Action("Walk through door", preconditions={"door open"}, add_effects={"at garden"}, del_effects={"at door"})
-]
+def run_experiment(max_states):
+    execution_times = []
+    num_states = range(1, max_states + 1)
 
-# Initial state and goal state
-initial_state = {"at door"}
-goal_state = {"at garden"}
+    for n in num_states:
+        print(f"\nRunning experiment with {n} states")
+        states = [f"State{i}" for i in range(n)]
+        actions = [Action(f"Action{i}", [f"State{i}"], [f"State{i+1}"], []) for i in range(n-1)]
 
-# Create and build the planning graph
-planning_graph = PlanningGraph(initial_state, actions)
-planning_graph.build_graph(goal_state)
-planning_graph.display()
+        planning_graph = PlanningGraph(states[:1], actions)
+        goal_state = {states[-1]}
+
+        print("Starting planning graph construction")
+        start_time = time.time()
+        planning_graph.build_graph(goal_state)
+        end_time = time.time()
+
+        execution_time = end_time - start_time
+        print(f"Execution time for {n} states: {execution_time} seconds")
+        execution_times.append(execution_time)
+
+    return num_states, execution_times
+
+# Run the experiment
+max_states = 10  # Adjust based on your computational resources
+num_states, execution_times = run_experiment(max_states)
+
+# Plotting the results
+plt.plot(num_states, execution_times, marker='o')
+plt.xlabel('Number of States')
+plt.ylabel('Execution Time (seconds)')
+plt.title('Planning Graph Complexity')
+plt.show()
