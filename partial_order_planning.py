@@ -1,8 +1,11 @@
+import time
+import matplotlib.pyplot as plt
+
 class Action:
     def __init__(self, name, preconditions, effects):
         self.name = name
-        self.preconditions = preconditions
-        self.effects = effects
+        self.preconditions = set(preconditions)
+        self.effects = set(effects)
 
     def __repr__(self):
         return f"{self.name}"
@@ -26,6 +29,7 @@ class PartialOrderPlan:
         return True
 
     def apply_action(self, action):
+        print(f"Applying action: {action}")
         self.actions.append(action)
         for precond in action.preconditions:
             self.open_preconditions.append((precond, action))
@@ -66,22 +70,37 @@ class PartialOrderPlanner:
         return plan
 
 
-# Define actions
-actions = [
-    Action("Pick up key", ["at door"], ["has key"]),
-    Action("Unlock door", ["has key"], ["door unlocked"]),
-    Action("Open door", ["door unlocked"], ["door open"]),
-    Action("Walk through door", ["door open"], ["at garden"])
-]
+def run_experiment(max_actions):
+    execution_times = []
+    num_actions = range(1, max_actions + 1)
 
-# Create a planner
-planner = PartialOrderPlanner(actions)
+    for n in num_actions:
+        print(f"\nRunning experiment with {n} actions")
+        actions = [Action(f"Action{i}", [f"Precond{i}"], [f"Effect{i}"]) for i in range(n)]
 
-# Define initial state and goal state
-initial_state = ["at door"]
-goal_state = ["at garden"]
+        planner = PartialOrderPlanner(actions)
+        initial_state = ["Precond0"]
+        goal_state = [f"Effect{n-1}"]
 
-# Generate the plan
-plan = planner.plan(initial_state, goal_state)
-print("Plan:")
-print(plan)
+        print("Starting planning")
+        start_time = time.time()
+        planner.plan(initial_state, goal_state)
+        end_time = time.time()
+
+        execution_time = end_time - start_time
+        print(f"Execution time for {n} actions: {execution_time} seconds")
+        execution_times.append(execution_time)
+
+    return num_actions, execution_times
+
+
+# Run the experiment
+max_actions = 10  # Adjust based on your computational resources
+num_actions, execution_times = run_experiment(max_actions)
+
+# Plotting the results
+plt.plot(num_actions, execution_times, marker='o')
+plt.xlabel('Number of Actions')
+plt.ylabel('Execution Time (seconds)')
+plt.title('Plan-Space Planning Complexity')
+plt.show()
