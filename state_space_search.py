@@ -56,9 +56,9 @@ def run_experiment(max_blocks):
 
     for n in num_blocks:
         print(f"\nRunning experiment with {n} blocks")
-        blocks = [chr(65 + i) for i in range(n)]  # create block labels (e.g. A, B, C, ...)
+        blocks = [chr(65 + i) for i in range(n)]  # Create block labels (A, B, C, ...)
         initial_state = State(blocks)
-        goal_state = State(blocks[::-1])  # reverse the block order for the goal state
+        goal_state = State(blocks[::-1])  # Reverse the block order for the goal state
 
         problem = BlockWorld(initial_state, goal_state)
 
@@ -74,11 +74,11 @@ def run_experiment(max_blocks):
     return num_blocks, execution_times
 
 
-# run the experiment
-max_blocks = 10  # adjust according to computational resources
+# Run the experiment
+max_blocks = 10  # Adjust this number based on your computational resources
 num_blocks, execution_times = run_experiment(max_blocks)
 
-# plot exp results
+# Plotting the results
 plt.plot(num_blocks, execution_times, marker='o')
 plt.xlabel('Number of Blocks')
 plt.ylabel('Execution Time (seconds)')
